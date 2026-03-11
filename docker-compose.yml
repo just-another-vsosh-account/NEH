@@ -1,0 +1,110 @@
+services:
+  nginx:
+    profiles: ["nginx-module"]
+    build:
+      context: .
+      dockerfile: nginx-module/Dockerfile
+    ports:
+      - "8081:80"
+      - "18081:18081"
+      - "18082:18082"
+      - "18083:18083"
+    depends_on:
+      - honeypot
+      - protected-app
+    volumes:
+      - neh-logs:/var/log/neh
+
+  gateway:
+    build:
+      context: ./gateway
+    ports:
+      - "8080:80"
+    depends_on:
+      - honeypot
+      - protected-app
+    environment:
+      - PORT=80
+      - LOG_FILE=/var/log/neh/nginx-events.jsonl
+      - PROTECTED_BASE=http://protected-app:5001
+      - HONEYPOT_BASE=http://honeypot:5000
+    volumes:
+      - neh-logs:/var/log/neh
+
+  honeypot:
+    build:
+      context: ./honeypot
+    environment:
+      - PORT=5000
+      - LOG_FILE=/var/log/neh/honeypot.jsonl
+    volumes:
+      - neh-logs:/var/log/neh
+
+  protected-app:
+    build:
+      context: ./protected-app
+    environment:
+      - PORT=5001
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - XPACK_SECURITY_ENABLED=false
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=neh-demo-kibana-encryption-key-32c
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  kibana-bootstrap:
+    image: curlimages/curl:8.11.1
+    depends_on:
+      - kibana
+    volumes:
+      - ./lab/kibana/neh-dashboard.ndjson:/assets/neh-dashboard.ndjson:ro
+    entrypoint:
+      - sh
+      - -ceu
+      - |
+        until curl -fsS http://kibana:5601/api/status >/dev/null; do
+          sleep 5
+        done
+        curl -fsS -X POST "http://kibana:5601/api/saved_objects/_import?overwrite=true" \
+          -H "kbn-xsrf: true" \
+          -F file=@/assets/neh-dashboard.ndjson >/dev/null
+
+  telegram-bot:
+    build:
+      context: ./telegram-bot
+    env_file:
+      - ./.env
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+      - kibana
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.13.4
+    user: root
+    command: ["filebeat", "-e", "--strict.perms=false"]
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - neh-logs:/var/log/neh:ro
+    depends_on:
+      - elasticsearch
+      - gateway
+      - honeypot
+
+volumes:
+  neh-logs:

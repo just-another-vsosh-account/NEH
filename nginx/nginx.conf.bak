@@ -1,0 +1,92 @@
+load_module /etc/nginx/modules/ngx_http_neh_module.so;
+
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format neh_json escape=json
+      '{'
+        '"ts":"$time_iso8601",'
+        '"host":"$host",'
+        '"remote_addr":"$remote_addr",'
+        '"method":"$request_method",'
+        '"uri":"$uri",'
+        '"status":$status,'
+        '"event":"$neh_event",'
+        '"decision":"$neh_decision",'
+        '"note":"$neh_note",'
+        '"step":"$neh_step",'
+        '"user_agent":"$http_user_agent"'
+      '}';
+
+    access_log /var/log/neh/nginx-events.jsonl neh_json;
+    error_log /var/log/neh/nginx-error.log info;
+
+    sendfile on;
+    keepalive_timeout 65;
+
+    upstream protected_backend {
+        server protected-app:5001;
+    }
+
+    upstream honeypot_backend {
+        server honeypot:5000;
+    }
+
+    server {
+        listen 80;
+        listen 18081;
+        listen 18082;
+        listen 18083;
+        server_name _;
+
+        neh_enable on;
+        neh_knock_type uri;
+        neh_sequence /start /verify /grant;
+        neh_port_sequence 18081 18082 18083;
+        neh_protected_uri /admin;
+        neh_honeypot_uri /__neh_honeypot__;
+        neh_cookie_name neh_access;
+        neh_bind_host on;
+        neh_timeout 30s;
+        neh_access_window 60s;
+        neh_block_threshold 4;
+        neh_block_duration 120s;
+        neh_randomize_sequence off;
+        neh_random_secret neh-demo-seed;
+        neh_sequence_count 3;
+        neh_path_prefix knock;
+
+        location = / {
+            default_type text/plain;
+            return 200 "NEH demo gateway\n";
+        }
+
+        location = /admin {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass http://protected_backend;
+        }
+
+        location = /__neh_honeypot__ {
+            internal;
+            proxy_set_header Host $host;
+            proxy_set_header X-Original-URI $request_uri;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass http://honeypot_backend;
+        }
+
+        location / {
+            proxy_set_header Host $host;
+            proxy_set_header X-Original-URI $request_uri;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_pass http://honeypot_backend;
+        }
+    }
+}

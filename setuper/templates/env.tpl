@@ -1,0 +1,10 @@
+TG_BOT_TOKEN={tg_bot_token}
+TG_ALLOWED_USER_ID={tg_allowed_user_id}
+TG_BOT_NAME={tg_bot_name}
+KIBANA_PUBLIC_URL={kibana_public_url}
+TG_ALERT_CHAT_ID={tg_alert_chat_id}
+TG_ALERT_THRESHOLD={tg_alert_threshold}
+TG_ALERT_WINDOW_SECONDS={tg_alert_window_seconds}
+TG_ALERT_COOLDOWN_SECONDS={tg_alert_cooldown_seconds}
+TG_LOOP_SLEEP={tg_loop_sleep}
+TG_POLL_TIMEOUT={tg_poll_timeout}
