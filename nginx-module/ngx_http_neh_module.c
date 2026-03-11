@@ -93,119 +93,119 @@ static ngx_http_module_t ngx_http_neh_module_ctx;
 
 static ngx_command_t ngx_http_neh_commands[] = {
     { ngx_string("neh_enable"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, enable),
       NULL },
 
     { ngx_string("neh_sequence"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
       ngx_conf_set_str_array_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, sequence),
       NULL },
 
     { ngx_string("neh_port_sequence"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_1MORE,
       ngx_conf_set_str_array_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, port_sequence),
       NULL },
 
     { ngx_string("neh_knock_type"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_http_neh_set_knock_type,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("neh_knok_type"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_http_neh_set_knock_type,
       NGX_HTTP_LOC_CONF_OFFSET,
       0,
       NULL },
 
     { ngx_string("neh_protected_uri"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, protected_uri),
       NULL },
 
     { ngx_string("neh_honeypot_uri"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, honeypot_uri),
       NULL },
 
     { ngx_string("neh_timeout"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_msec_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, timeout),
       NULL },
 
     { ngx_string("neh_access_window"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_msec_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, access_window),
       NULL },
 
     { ngx_string("neh_cookie_name"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, cookie_name),
       NULL },
 
     { ngx_string("neh_bind_host"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, bind_host),
       NULL },
 
     { ngx_string("neh_block_threshold"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_num_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, block_threshold),
       NULL },
 
     { ngx_string("neh_block_duration"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_msec_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, block_duration),
       NULL },
 
     { ngx_string("neh_randomize_sequence"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_FLAG,
       ngx_conf_set_flag_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, randomize_sequence),
       NULL },
 
     { ngx_string("neh_random_secret"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, random_secret),
       NULL },
 
     { ngx_string("neh_sequence_count"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_num_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, sequence_count),
       NULL },
 
     { ngx_string("neh_path_prefix"),
-      NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
+      NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_CONF_TAKE1,
       ngx_conf_set_str_slot,
       NGX_HTTP_LOC_CONF_OFFSET,
       offsetof(ngx_http_neh_loc_conf_t, path_prefix),
@@ -222,7 +222,7 @@ static ngx_http_variable_t ngx_http_neh_vars[] = {
     ngx_http_null_variable
 };
 
-static ngx_module_t ngx_http_neh_module = {
+ngx_module_t ngx_http_neh_module = {
     NGX_MODULE_V1,
     &ngx_http_neh_module_ctx,
     ngx_http_neh_commands,
@@ -878,13 +878,15 @@ ngx_http_neh_init_zone(ngx_shm_zone_t *shm_zone, void *data)
 {
     ngx_slab_pool_t *shpool;
     ngx_http_neh_main_conf_t *nmcf;
+    ngx_http_neh_main_conf_t *old_nmcf;
     ngx_http_neh_shctx_t *sh;
     ngx_uint_t i;
 
     nmcf = shm_zone->data;
 
     if (data) {
-        nmcf->sh = data;
+        old_nmcf = data;
+        nmcf->sh = old_nmcf->sh;
         return NGX_OK;
     }
 
@@ -906,7 +908,6 @@ ngx_http_neh_init_zone(ngx_shm_zone_t *shm_zone, void *data)
     }
 
     nmcf->sh = sh;
-    shm_zone->data = sh;
     return NGX_OK;
 }
 

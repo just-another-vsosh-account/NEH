@@ -1,4 +1,4 @@
-FROM debian:bookworm AS builder
+FROM nginx:1.26.3 AS builder
 
 RUN apt-get -o Acquire::AllowInsecureRepositories=true \
     -o Acquire::AllowDowngradeToInsecureRepositories=true update \
@@ -19,7 +19,8 @@ RUN tar -xzf nginx-1.26.3.tar.gz
 COPY nginx-module/ /module/
 
 WORKDIR /build/nginx-1.26.3
-RUN ./configure --with-compat --add-dynamic-module=/module
+RUN CONFARGS="$(nginx -V 2>&1 | sed -n 's/^.*arguments: //p')" \
+    && eval "./configure $CONFARGS --add-dynamic-module=/module"
 RUN make modules
 
 FROM nginx:1.26.3
