@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  functional-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create test env file
+        run: |
+          cat > .env <<'EOF'
+          TG_BOT_TOKEN=test-token
+          TG_ALLOWED_USER_ID=1,2
+          TG_BOT_NAME=Наблюдатель NEH
+          KIBANA_PUBLIC_URL=http://localhost:5601
+          TG_ALERT_CHAT_ID=1
+          TG_ALERT_THRESHOLD=3
+          TG_ALERT_WINDOW_SECONDS=10
+          TG_ALERT_COOLDOWN_SECONDS=15
+          TG_LOOP_SLEEP=0.5
+          TG_POLL_TIMEOUT=5
+          EOF
+
+      - name: Python syntax check
+        run: python -m py_compile gateway/app.py honeypot/app.py protected-app/app.py telegram-bot/app.py setuper/setup_neh.py
+
+      - name: Run functional tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Render docker compose config
+        run: docker compose config >/tmp/docker-compose.rendered.yml
+
+  heavy-compose-tests:
+    runs-on: ubuntu-latest
+    needs: functional-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create test env file
+        run: |
+          cat > .env <<'EOF'
+          TG_BOT_TOKEN=test-token
+          TG_ALLOWED_USER_ID=1,2
+          TG_BOT_NAME=Наблюдатель NEH
+          KIBANA_PUBLIC_URL=http://localhost:5601
+          TG_ALERT_CHAT_ID=1
+          TG_ALERT_THRESHOLD=3
+          TG_ALERT_WINDOW_SECONDS=10
+          TG_ALERT_COOLDOWN_SECONDS=15
+          TG_LOOP_SLEEP=0.5
+          TG_POLL_TIMEOUT=5
+          EOF
+
+      - name: Run heavy compose smoke tests
+        run: sh tests/heavy/test_compose_stack.sh
